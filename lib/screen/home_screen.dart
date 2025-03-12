@@ -1,5 +1,6 @@
 ///리팩한 코드
 import 'package:calendar_test/component/calendar.dart';
+import 'package:calendar_test/component/today_banner.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -8,26 +9,31 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  DateTime? selectedDay;
+  DateTime selectedDay = DateTime.utc(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day,
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: SafeArea(
-          child: Container(
-              child: Column(
-                children: [
-                  Calendar(
-                    focusedDay: DateTime.utc(2025, 03, 01),
-                    onDaySelected: onDaySelected,
+      child: Container(
+          child: Column(
+        children: [
+          Calendar(
+            focusedDay: DateTime.utc(2025, 03, 01),
+            onDaySelected: onDaySelected,
 
-                    /// The argument type 'dynamic Function(DateTime)' can't be assigned to the parameter type 'bool Function(DateTime)
-                    /// 인수 유형 '동적 함수(DateTime)'는 매개변수 유형 'bool 함수(DateTime)'에 할당할 수 없습니다.
-                    selectedDayPredicate: selectedDayPredicate,
-                  ),
-                ],
-              )),
-        ));
+            /// The argument type 'dynamic Function(DateTime)' can't be assigned to the parameter type 'bool Function(DateTime)
+            /// 인수 유형 '동적 함수(DateTime)'는 매개변수 유형 'bool 함수(DateTime)'에 할당할 수 없습니다.
+            selectedDayPredicate: selectedDayPredicate,
+          ),
+          TodayBanner(selectedDay: selectedDay, taskCount: 0,)
+        ],
+      )),
+    ));
   }
 
   void onDaySelected(DateTime selectedDay, DateTime focusedDay) {

@@ -1,5 +1,6 @@
 ///리팩한 코드
 import 'package:calendar_test/component/calendar.dart';
+import 'package:calendar_test/component/schedule_card.dart';
 import 'package:calendar_test/component/today_banner.dart';
 import 'package:flutter/material.dart';
 
@@ -30,7 +31,25 @@ class _HomeScreenState extends State<HomeScreen> {
             /// 인수 유형 '동적 함수(DateTime)'는 매개변수 유형 'bool 함수(DateTime)'에 할당할 수 없습니다.
             selectedDayPredicate: selectedDayPredicate,
           ),
-          TodayBanner(selectedDay: selectedDay, taskCount: 0,)
+          TodayBanner(
+            selectedDay: selectedDay,
+            taskCount: 0,
+          ),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(left: 15, right: 16, top: 8),
+              child: ListView(
+                children: [
+                  ScheduleCard(
+                    startTime: DateTime(2025, 3, 20,08),
+                    endTime: DateTime(2025, 3, 20,12),
+                    content: '플러터 공부하기',
+                    color: Colors.blue,
+                  )
+                ],
+              ),
+            ),
+          )
         ],
       )),
     ));

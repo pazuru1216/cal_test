@@ -14,18 +14,6 @@ class Calendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultBoxDecoration = BoxDecoration(
-      borderRadius: BorderRadius.circular(6.0),
-      border: Border.all(
-        color: Colors.grey[200]!,
-        width: 1.0,
-      ),
-    );
-
-    final defaultTextStyle = TextStyle(
-        color: Colors.grey[600]
-    );
-
     return TableCalendar(
       locale: 'ko_KR',
       focusedDay: focusedDay,

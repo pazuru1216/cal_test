@@ -1,3 +1,4 @@
+import 'package:calendar_test/const/color.dart';
 import 'package:flutter/material.dart';
 
 class ScheduleCard extends StatelessWidget {
@@ -18,7 +19,7 @@ class ScheduleCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.blueAccent,
+            color: PRIMARY_COLOR,
             width: 1,
           ),
           borderRadius: BorderRadius.circular(8)

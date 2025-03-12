@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:calendar_test/const/color.dart';
 
 class TodayBanner extends StatelessWidget {
   final DateTime selectedDay;
@@ -12,7 +13,7 @@ class TodayBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.blueAccent,
+      color: PRIMARY_COLOR,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(

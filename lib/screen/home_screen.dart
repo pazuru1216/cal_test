@@ -5,6 +5,7 @@ import 'package:calendar_test/component/schedule_buttom_sheet.dart';
 import 'package:calendar_test/component/schedule_card.dart';
 import 'package:calendar_test/component/today_banner.dart';
 import 'package:calendar_test/const/color.dart';
+import 'package:calendar_test/model/schedule.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,6 +19,33 @@ class _HomeScreenState extends State<HomeScreen> {
     DateTime.now().month,
     DateTime.now().day,
   );
+
+  ///{
+  ///  2023-11-23:[Schedule, Schedule],
+  ///  2023-11-23:[Schedule, Schedule],
+  ///}
+  Map<DateTime, List<Schedule>> schedules = {
+    DateTime.utc(2025, 3, 8): [
+      Schedule(
+        id: 1,
+        startTime: 11,
+        endTime: 12,
+        content: '플러터 공부하기',
+        color: categoryColors[0],
+        date: DateTime.utc(2025, 3, 8),
+        createdAt: DateTime.now().toUtc(),
+      ),
+      Schedule(
+        id: 2,
+        startTime: 14,
+        endTime: 16,
+        content: '인프런 수업듣기',
+        color: categoryColors[3],
+        date: DateTime.utc(2025, 3, 1),
+        createdAt: DateTime.now().toUtc(),
+      ),
+    ]
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -59,14 +87,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Padding(
                   padding: EdgeInsets.only(left: 15, right: 16, top: 8),
                   child: ListView(
-                    children: [
-                      ScheduleCard(
-                        startTime: DateTime(2025, 3, 20, 08),
-                        endTime: DateTime(2025, 3, 20, 12),
-                        content: '플러터 공부하기',
-                        color: PRIMARY_COLOR,
-                      )
-                    ],
+                    ///selectedDay라는 key값을 schedules 변수에서 갖고있는지 확인하는 continsKey
+                    children: schedules.containsKey(selectedDay)
+                        ? schedules[selectedDay]!
+                            .map(
+                              (e) => ScheduleCard(
+                                startTime: e.startTime,
+                                endTime: e.endTime,
+                                content: e.content,
+                                color: Color(
+                                  int.parse(
+                                    'FF${e.color}',
+                                    radix: 16,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList()
+                        : [],
                   ),
                 ),
               )

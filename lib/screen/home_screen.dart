@@ -1,6 +1,7 @@
 ///리팩한 코드
 import 'package:calendar_test/component/calendar.dart';
 import 'package:calendar_test/component/custom_text_fromfeild.dart';
+import 'package:calendar_test/component/schedule_buttom_sheet.dart';
 import 'package:calendar_test/component/schedule_card.dart';
 import 'package:calendar_test/component/today_banner.dart';
 import 'package:calendar_test/const/color.dart';
@@ -28,67 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
             showModalBottomSheet(
               context: context,
               builder: (_) {
-                return SafeArea(
-                  bottom: true,
-                  child: Container(
-                    color: Colors.white,
-                    height: 600,
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 8, right: 8, top: 16),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: CustomTextFromfeild(
-                                  label: '시작시간',
-                                ),
-                              ),
-                              SizedBox(
-                                width: 16,
-                              ),
-                              Expanded(
-                                child: CustomTextFromfeild(
-                                  label: '마감시간',
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8,),
-                          Expanded(
-                            child: CustomTextFromfeild(
-                              label: '내용',
-                              expand: true,
-                            ),
-                          ),
-                          SizedBox(height: 8,),
-                          Row(
-                            children: categoryColors.map(
-                              (e) => Padding(
-                                padding: EdgeInsets.only(right: 8),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      color: Color(
-                                        ///이 String을 16진수로 변환해라
-                                        ///이 과정을 거치면 0xFF44336이 나온다
-                                        int.parse(
-                                          'FF$e',
-                                          radix: 16,
-                                        ),
-                                      ),
-                                      shape: BoxShape.circle,
-                                  ),
-                                  width: 32,
-                                  height: 32,
-                                ),
-                              ),
-                            ).toList(),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                );
+                return ScheduleButtomSheet();
               },
             );
           },

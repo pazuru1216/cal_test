@@ -71,7 +71,18 @@ class _ScheduleButtomSheetState extends State<ScheduleButtomSheet> {
     startTime = int.parse(val);
   }
 
-  String? onStartTimeValidate(String? val) {}
+  String? onStartTimeValidate(String? val) {
+    if (val == null) {
+      return '값을 입력해주세요!';
+    }
+    if (int.tryParse(val) == null) {
+      return '숫자를 입력해주세요';
+    }
+    if(int.tryParse(val)!>24 || int.tryParse(val)!<0){
+      return('24시간 내의 시간을 작성해주세요');
+    }
+  }
+
   void onEndTimeSaved(String? val) {
     if (val == null) {
       return;
@@ -80,7 +91,19 @@ class _ScheduleButtomSheetState extends State<ScheduleButtomSheet> {
     endTime = int.parse(val);
   }
 
-  String? onEndTimeValidate(String? val) {}
+  String? onEndTimeValidate(String? val) {
+    if (val == null) {
+      return '값을 입력해주세요!';
+    }
+    if (int.tryParse(val) == null) {
+      return '숫자를 입력해주세요';
+    }
+
+    if(int.tryParse(val)!>24 || int.tryParse(val)!<0){
+      return('24시간 내의 시간을 작성해주세요');
+    }
+  }
+
   void onContentSaved(String? val) {
     if (val == null) {
       return;
@@ -89,14 +112,29 @@ class _ScheduleButtomSheetState extends State<ScheduleButtomSheet> {
     content = val;
   }
 
-  String? onContentValidate(String? val) {}
-  void onSavedPressed() {
-    formKey.currentState!.save();
+  String? onContentValidate(String? val) {
+    if (val == null) {
+      return '값을 입력해주세요!';
+    }
+    if(val.length<5){
+      return '5자 이상을 입력해주세요';
+    }
 
-    print(startTime);
-    print(endTime);
-    print(content);
-    print(category);
+    return null;
+  }
+
+  void onSavedPressed() {
+    final isValid = formKey.currentState!.validate();
+
+    if(isValid){
+      formKey.currentState!.save();
+      print(startTime);
+      print(endTime);
+      print(content);
+      print(category);
+    }else{
+
+    }
   }
 }
 

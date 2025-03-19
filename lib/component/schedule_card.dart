@@ -7,12 +7,12 @@ class ScheduleCard extends StatelessWidget {
   final String content;
   final Color color;
 
-  const ScheduleCard({
-    required this.startTime,
-    required this.endTime,
-    required this.content,
-    required this.color,
-    super.key});
+  const ScheduleCard(
+      {required this.startTime,
+      required this.endTime,
+      required this.content,
+      required this.color,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +22,7 @@ class ScheduleCard extends StatelessWidget {
             color: PRIMARY_COLOR,
             width: 1,
           ),
-          borderRadius: BorderRadius.circular(8)
-      ),
+          borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: EdgeInsets.all(16),
         child: IntrinsicHeight(
@@ -41,11 +40,11 @@ class ScheduleCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${startTime.toString().padLeft(2,'0')}:00',
+                      '${startTime.toString().padLeft(2, '0')}:00',
                       style: TextStyle(fontSize: 16),
                     ),
                     Text(
-                      '${endTime.toString().padLeft(2,'0')}:00',
+                      '${endTime.toString().padLeft(2, '0')}:00',
                       style: TextStyle(fontSize: 10),
                     )
                   ],
@@ -54,7 +53,14 @@ class ScheduleCard extends StatelessWidget {
               SizedBox(
                 width: 16,
               ),
-              Expanded(child: Container(color: Colors.yellow,child: Text(content))),
+              Expanded(
+                child: Container(
+                  color: Colors.yellow,
+                  child: Text(
+                    content,
+                  ),
+                ),
+              ),
               Container(
                 decoration: BoxDecoration(
                   color: color,

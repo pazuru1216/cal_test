@@ -86,25 +86,37 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(left: 15, right: 16, top: 8),
-                  child: ListView(
-                    ///selectedDay라는 key값을 schedules 변수에서 갖고있는지 확인하는 continsKey
-                    children: schedules.containsKey(selectedDay)
-                        ? schedules[selectedDay]!
-                            .map(
-                              (e) => ScheduleCard(
-                                startTime: e.startTime,
-                                endTime: e.endTime,
-                                content: e.content,
-                                color: Color(
-                                  int.parse(
-                                    'FF${e.color}',
-                                    radix: 16,
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList()
-                        : [],
+                  child: ListView.separated(
+                    ///화면에 몇개를 보여줄거냐 -> 길이를 넣어주면 됨
+                    ///선택한 날짜에 키 값이 존재하니?
+                    itemCount: schedules.containsKey(selectedDay)
+
+                        ///ㅇㅇ 존재함. selectedDay 키 값을 기반으로 스케쥴 가져올게~
+                        ? schedules[selectedDay]!.length
+                        : 0,
+
+                    ///화면이 위젯에 보일때마다 실행되는 itemBuilder
+                    itemBuilder: (BuildContext context, int index) {
+                      ///선택된 날짜에 해당되는 일정 리스트로 저장
+                      ///List<Schedule>
+                      final selectedSchedules = schedules[selectedDay]!;
+                      final sheduleModel = selectedSchedules[index];
+
+                      return ScheduleCard(
+                        startTime: sheduleModel.startTime,
+                        endTime: sheduleModel.endTime,
+                        content: sheduleModel.content,
+                        color: Color(
+                          int.parse(
+                            'FF${sheduleModel.color}',
+                            radix: 16,
+                          ),
+                        ),
+                      );
+                    },
+                    separatorBuilder: (BuildContext context, int index){
+                      return SizedBox(height: 8,);
+                    },
                   ),
                 ),
               )

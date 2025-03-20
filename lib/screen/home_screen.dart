@@ -53,14 +53,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
         ///+ 버튼을 눌렀을때 올라오는 바텀시트
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            showModalBottomSheet(
+          onPressed: () async {
+            ///rsep = response라는 뜻
+            final routeSchedule = await showModalBottomSheet<Schedule>(
               context: context,
               builder: (_) {
-                return ScheduleButtomSheet();
+                return ScheduleButtomSheet(
+                  selectedDay: selectedDay,
+                );
               },
             );
+
+            if (routeSchedule == null) {
+              return;
+            }
+            ;
+
+            final dateExists = schedules.containsKey(routeSchedule.date);
+            final List<Schedule> exitstingSchedules =
+                dateExists ? schedules[routeSchedule.date]! : [];
+
+            /// [Schedule1, Schedules2]
+            /// [Schedule2]
+            exitstingSchedules!.add(routeSchedule);
+
+            setState(() {
+              schedules = {
+                ...schedules,
+                routeSchedule.date: exitstingSchedules,
+              };
+            });
           },
+
           backgroundColor: PRIMARY_COLOR,
           child: Icon(
             Icons.add,
@@ -114,8 +138,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       );
                     },
-                    separatorBuilder: (BuildContext context, int index){
-                      return SizedBox(height: 8,);
+                    separatorBuilder: (BuildContext context, int index) {
+                      return SizedBox(
+                        height: 8,
+                      );
                     },
                   ),
                 ),

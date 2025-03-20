@@ -1,9 +1,11 @@
 import 'package:calendar_test/component/custom_text_fromfeild.dart';
 import 'package:calendar_test/const/color.dart';
+import 'package:calendar_test/model/schedule.dart';
 import 'package:flutter/material.dart';
 
 class ScheduleButtomSheet extends StatefulWidget {
-  const ScheduleButtomSheet({super.key});
+  final DateTime selectedDay;
+  const ScheduleButtomSheet({required this.selectedDay,super.key});
 
   @override
   State<ScheduleButtomSheet> createState() => _ScheduleButtomSheetState();
@@ -15,7 +17,6 @@ class _ScheduleButtomSheetState extends State<ScheduleButtomSheet> {
   int? startTime;
   int? endTime;
   String? content;
-  String? category;
 
   String selectedColor = categoryColors.first;
 
@@ -128,12 +129,20 @@ class _ScheduleButtomSheetState extends State<ScheduleButtomSheet> {
 
     if(isValid){
       formKey.currentState!.save();
-      print(startTime);
-      print(endTime);
-      print(content);
-      print(category);
-    }else{
 
+      final routeSchedule = Schedule(
+        id: 99,
+        startTime: startTime!,
+        endTime: endTime!,
+        content: content!,
+        color: selectedColor,
+        date: widget.selectedDay,
+        createdAt: DateTime.now().toUtc(),
+      );
+
+      Navigator.of(context).pop(
+        routeSchedule,
+      );
     }
   }
 }

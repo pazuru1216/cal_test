@@ -34,7 +34,6 @@ class ScheduleCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
-                color: Colors.red,
                 child: Column(
                   ///늘어난 공간에서 좌측상단을 차지함
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,7 +54,6 @@ class ScheduleCard extends StatelessWidget {
               ),
               Expanded(
                 child: Container(
-                  color: Colors.yellow,
                   child: Text(
                     content,
                   ),

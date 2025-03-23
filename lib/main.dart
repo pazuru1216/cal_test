@@ -14,10 +14,6 @@ void main() async {
   final database = AppDatabase();
   GetIt.I.registerSingleton<AppDatabase>(database);
 
-  final resp = await database.getSchedules();
-  print('-----------------------------');
-  print(resp);
-
   runApp(
     MaterialApp(
       home: HomeScreen(),

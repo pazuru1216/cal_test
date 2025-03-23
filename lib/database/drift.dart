@@ -13,33 +13,49 @@ part 'drift.g.dart';
 
 /// @ > 에노테이션
 @DriftDatabase(
-  /// 생성할 테이블은 이 리스트에 넣어주면 된다.
-  tables: [ScheduleTable]
-)
-class AppDatabase extends _$AppDatabase{
+
+    /// 생성할 테이블은 이 리스트에 넣어주면 된다.
+    tables: [ScheduleTable])
+class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   ///query 작성
-  ///ScheduleTable을 만들면 ScheduleTableData를 drift.g.dart가 자동으로 만들어
-  Future<List<ScheduleTableData>> getSchedules() => select(scheduleTable).get();
+  ///ScheduleTable을 만들면 ScheduleTableData를 drift.g.dart가 자동으로 만들어줌
+  Future<List<ScheduleTableData>> getSchedules(
+    ///필터링을 원하는 날짜를 입력받음.
+    DateTime date,
+  ) {
+    // final selectQuery = select(scheduleTable);
+    // ///파라미터에 입력한 값(date)과 일치하는 날짜들만(tbl.date) 가져올 수 있다.
+    // selectQuery.where((tbl)=>tbl.date.equals(date));
+    // ///값들 다 골랐으면 가져와~ get()
+    // return selectQuery.get();
+    return (select(scheduleTable)..where((table)=>table.date.equals(date))).get();
+  }
 
   /// 무언가를 생성하면 생성한 값에 대한 id값이 자동적으로 생성된다. 그게 int 값임.
   /// 값을 업데이트하거나 데이터 생성할때 사용되는 ~Companion >> 얘도 자동생성되는 값
   /// 값을 받아올때는 ~Data
   /// into(table명)
-  Future<int> createSchedule(ScheduleTableCompanion data) => into(scheduleTable).insert(data);
+  Future<int> createSchedule(ScheduleTableCompanion data) =>
+      into(scheduleTable).insert(data);
 
+  /// 삭제한 값의 id를 받아볼 수 있기때문에 타입은 int
+  Future<int> removeSchedule(int id) => (delete(scheduleTable)..where(
+      (table)=>table.id.equals(id),
+  )).go();
 
   @override
   /// schema table들을 버젼으로 관리한다.
   int get schemaVersion => 1;
 }
 
-LazyDatabase _openConnection(){
-  return LazyDatabase(() async{
+LazyDatabase _openConnection() {
+  return LazyDatabase(() async {
     /// 핸드폰마다 어플을 설치하면 자체적으로 제공해주는 폴더가 있는데
     /// 그 폴더 위치를 가져오는 getApplicationDocumentsDirectory
     final dbFolder = await getApplicationDocumentsDirectory();
+
     ///File은 꼭 dart.io에서 불러올것. htmlㄴㄴ
     /// C:\\User\flutter 윈도우 기반
     /// /User/flutter/
@@ -47,7 +63,7 @@ LazyDatabase _openConnection(){
     /// /Users/flutter/name/orange/
     final file = File(p.join(dbFolder.path, 'db.sqlite'));
 
-    if(Platform.isAndroid){
+    if (Platform.isAndroid) {
       /// 옛날버전의 안드로이드 오류 해결해주는 코드
       await applyWorkaroundToOpenSqlite3OnOldAndroidVersions();
     }
@@ -55,6 +71,7 @@ LazyDatabase _openConnection(){
     ///sqlite가 임시파일 폴더의 위치를 모를까봐 지정해주는것.
     ///얘가 없어도 실행은 된다.
     final cachebase = await getTemporaryDirectory();
+
     /// 쓸데없는 캐시를 저장함
     sqlite3.tempDirectory = cachebase.path;
 

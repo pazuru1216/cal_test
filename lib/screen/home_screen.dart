@@ -22,33 +22,6 @@ class _HomeScreenState extends State<HomeScreen> {
     DateTime.now().day,
   );
 
-  ///{
-  ///  2023-11-23:[Schedule, Schedule],
-  ///  2023-11-23:[Schedule, Schedule],
-  ///}
-  // Map<DateTime, List<ScheduleTable>> schedules = {
-  //   DateTime.utc(2025, 3, 8): [
-  //     ScheduleTable(
-  //       id: 1,
-  //       startTime: 11,
-  //       endTime: 12,
-  //       content: '플러터 공부하기',
-  //       color: categoryColors[0],
-  //       date: DateTime.utc(2025, 3, 8),
-  //       createdAt: DateTime.now().toUtc(),
-  //     ),
-  //     ScheduleTable(
-  //       id: 2,
-  //       startTime: 14,
-  //       endTime: 16,
-  //       content: '인프런 수업듣기',
-  //       color: categoryColors[3],
-  //       date: DateTime.utc(2025, 3, 1),
-  //       createdAt: DateTime.now().toUtc(),
-  //     ),
-  //   ]
-  // };
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,21 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
             );
 
             setState(() {});
-
-            // final dateExists = schedules.containsKey(routeSchedule.date);
-            // final List<ScheduleTable> exitstingSchedules =
-            //     dateExists ? schedules[routeSchedule.date]! : [];
-
-            /// [Schedule1, Schedules2]
-            /// [Schedule2]
-            // exitstingSchedules!.add(routeSchedule);
-
-            // setState(() {
-            //   schedules = {
-            //     ...schedules,
-            //     routeSchedule.date: exitstingSchedules,
-            //   };
-            // });
           },
           backgroundColor: PRIMARY_COLOR,
           child: Icon(
@@ -109,7 +67,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Padding(
                   padding: EdgeInsets.only(left: 15, right: 16, top: 8),
                   child: FutureBuilder<List<ScheduleTableData>>(
-                      future: GetIt.I<AppDatabase>().getSchedules(),
+                      future: GetIt.I<AppDatabase>().getSchedules(
+                        selectedDay,
+                      ),
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {
                           return Center(
@@ -128,14 +88,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
 
                         final schedules = snapshot.data!;
-                        final selectedSchedules = schedules.where(
-                          (e) => e.date.isAtSameMomentAs(selectedDay),
-                        ).toList();
 
                         return ListView.separated(
                           ///화면에 몇개를 보여줄거냐 -> 길이를 넣어주면 됨
                           ///선택한 날짜에 키 값이 존재하니?
-                          itemCount: selectedSchedules.length,
+                          itemCount: schedules.length,
 
                           ///화면이 위젯에 보일때마다 실행되는 itemBuilder
                           itemBuilder: (BuildContext context, int index) {
@@ -144,16 +101,28 @@ class _HomeScreenState extends State<HomeScreen> {
                             // final selectedSchedules = schedules[selectedDay]!;
                             // final sheduleModel = selectedSchedules[index];
 
-                            final schedule = selectedSchedules[index];
+                            final schedule = schedules[index];
 
-                            return ScheduleCard(
-                              startTime: schedule.startTime,
-                              endTime: schedule.endTime,
-                              content: schedule.content,
-                              color: Color(
-                                int.parse(
-                                  'FF${schedule.color}',
-                                  radix: 16,
+                            return Dismissible(
+                              key:ObjectKey(schedule.id),
+                              ///오른쪽에서 왼쪽으로 스와이프
+                              direction: DismissDirection.endToStart,
+                              confirmDismiss: (DismissDirection direction) async{
+                                await GetIt.I<AppDatabase>().removeSchedule(schedule.id);
+                                setState(() {});
+
+                                // 삭제하겠다.
+                                return true;
+                              },
+                              child: ScheduleCard(
+                                startTime: schedule.startTime,
+                                endTime: schedule.endTime,
+                                content: schedule.content,
+                                color: Color(
+                                  int.parse(
+                                    'FF${schedule.color}',
+                                    radix: 16,
+                                  ),
                                 ),
                               ),
                             );

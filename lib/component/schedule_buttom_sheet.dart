@@ -1,7 +1,10 @@
 import 'package:calendar_test/component/custom_text_fromfeild.dart';
 import 'package:calendar_test/const/color.dart';
+import 'package:calendar_test/database/drift.dart';
 import 'package:calendar_test/model/schedule.dart';
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
 class ScheduleButtomSheet extends StatefulWidget {
   final DateTime selectedDay;
@@ -124,25 +127,32 @@ class _ScheduleButtomSheetState extends State<ScheduleButtomSheet> {
     return null;
   }
 
-  void onSavedPressed() {
+  void onSavedPressed() async{
     final isValid = formKey.currentState!.validate();
 
     if(isValid){
       formKey.currentState!.save();
 
-      final routeSchedule = Schedule(
-        id: 99,
-        startTime: startTime!,
-        endTime: endTime!,
-        content: content!,
-        color: selectedColor,
-        date: widget.selectedDay,
-        createdAt: DateTime.now().toUtc(),
-      );
+      final database =  GetIt.I<AppDatabase>();
+      await database.createSchedule(ScheduleTableCompanion(
+        startTime: Value(startTime!),
+        endTime: Value(endTime!),
+        content: Value(content!),
+        color: Value(selectedColor!),
+        date: Value(widget.selectedDay!)
+      ));
 
-      Navigator.of(context).pop(
-        routeSchedule,
-      );
+      // final routeSchedule = ScheduleTable(
+      //   id: 99,
+      //   startTime: startTime!,
+      //   endTime: endTime!,
+      //   content: content!,
+      //   color: selectedColor,
+      //   date: widget.selectedDay,
+      //   createdAt: DateTime.now().toUtc(),
+      // );
+
+      Navigator.of(context).pop();
     }
   }
 }

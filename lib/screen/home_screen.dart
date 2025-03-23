@@ -5,8 +5,10 @@ import 'package:calendar_test/component/schedule_buttom_sheet.dart';
 import 'package:calendar_test/component/schedule_card.dart';
 import 'package:calendar_test/component/today_banner.dart';
 import 'package:calendar_test/const/color.dart';
+import 'package:calendar_test/database/drift.dart';
 import 'package:calendar_test/model/schedule.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -24,28 +26,28 @@ class _HomeScreenState extends State<HomeScreen> {
   ///  2023-11-23:[Schedule, Schedule],
   ///  2023-11-23:[Schedule, Schedule],
   ///}
-  Map<DateTime, List<Schedule>> schedules = {
-    DateTime.utc(2025, 3, 8): [
-      Schedule(
-        id: 1,
-        startTime: 11,
-        endTime: 12,
-        content: '플러터 공부하기',
-        color: categoryColors[0],
-        date: DateTime.utc(2025, 3, 8),
-        createdAt: DateTime.now().toUtc(),
-      ),
-      Schedule(
-        id: 2,
-        startTime: 14,
-        endTime: 16,
-        content: '인프런 수업듣기',
-        color: categoryColors[3],
-        date: DateTime.utc(2025, 3, 1),
-        createdAt: DateTime.now().toUtc(),
-      ),
-    ]
-  };
+  // Map<DateTime, List<ScheduleTable>> schedules = {
+  //   DateTime.utc(2025, 3, 8): [
+  //     ScheduleTable(
+  //       id: 1,
+  //       startTime: 11,
+  //       endTime: 12,
+  //       content: '플러터 공부하기',
+  //       color: categoryColors[0],
+  //       date: DateTime.utc(2025, 3, 8),
+  //       createdAt: DateTime.now().toUtc(),
+  //     ),
+  //     ScheduleTable(
+  //       id: 2,
+  //       startTime: 14,
+  //       endTime: 16,
+  //       content: '인프런 수업듣기',
+  //       color: categoryColors[3],
+  //       date: DateTime.utc(2025, 3, 1),
+  //       createdAt: DateTime.now().toUtc(),
+  //     ),
+  //   ]
+  // };
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
             ///rsep = response라는 뜻
-            final routeSchedule = await showModalBottomSheet<Schedule>(
+            final routeSchedule = await showModalBottomSheet<ScheduleTable>(
               context: context,
               builder: (_) {
                 return ScheduleButtomSheet(
@@ -64,27 +66,23 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             );
 
-            if (routeSchedule == null) {
-              return;
-            }
-            ;
+            setState(() {});
 
-            final dateExists = schedules.containsKey(routeSchedule.date);
-            final List<Schedule> exitstingSchedules =
-                dateExists ? schedules[routeSchedule.date]! : [];
+            // final dateExists = schedules.containsKey(routeSchedule.date);
+            // final List<ScheduleTable> exitstingSchedules =
+            //     dateExists ? schedules[routeSchedule.date]! : [];
 
             /// [Schedule1, Schedules2]
             /// [Schedule2]
-            exitstingSchedules!.add(routeSchedule);
+            // exitstingSchedules!.add(routeSchedule);
 
-            setState(() {
-              schedules = {
-                ...schedules,
-                routeSchedule.date: exitstingSchedules,
-              };
-            });
+            // setState(() {
+            //   schedules = {
+            //     ...schedules,
+            //     routeSchedule.date: exitstingSchedules,
+            //   };
+            // });
           },
-
           backgroundColor: PRIMARY_COLOR,
           child: Icon(
             Icons.add,
@@ -110,40 +108,63 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(left: 15, right: 16, top: 8),
-                  child: ListView.separated(
-                    ///화면에 몇개를 보여줄거냐 -> 길이를 넣어주면 됨
-                    ///선택한 날짜에 키 값이 존재하니?
-                    itemCount: schedules.containsKey(selectedDay)
+                  child: FutureBuilder<List<ScheduleTableData>>(
+                      future: GetIt.I<AppDatabase>().getSchedules(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              snapshot.error.toString(),
+                            ),
+                          );
+                        }
 
-                        ///ㅇㅇ 존재함. selectedDay 키 값을 기반으로 스케쥴 가져올게~
-                        ? schedules[selectedDay]!.length
-                        : 0,
+                        if (!snapshot.hasData &&
+                            snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
 
-                    ///화면이 위젯에 보일때마다 실행되는 itemBuilder
-                    itemBuilder: (BuildContext context, int index) {
-                      ///선택된 날짜에 해당되는 일정 리스트로 저장
-                      ///List<Schedule>
-                      final selectedSchedules = schedules[selectedDay]!;
-                      final sheduleModel = selectedSchedules[index];
+                        final schedules = snapshot.data!;
+                        final selectedSchedules = schedules.where(
+                          (e) => e.date.isAtSameMomentAs(selectedDay),
+                        ).toList();
 
-                      return ScheduleCard(
-                        startTime: sheduleModel.startTime,
-                        endTime: sheduleModel.endTime,
-                        content: sheduleModel.content,
-                        color: Color(
-                          int.parse(
-                            'FF${sheduleModel.color}',
-                            radix: 16,
-                          ),
-                        ),
-                      );
-                    },
-                    separatorBuilder: (BuildContext context, int index) {
-                      return SizedBox(
-                        height: 8,
-                      );
-                    },
-                  ),
+                        return ListView.separated(
+                          ///화면에 몇개를 보여줄거냐 -> 길이를 넣어주면 됨
+                          ///선택한 날짜에 키 값이 존재하니?
+                          itemCount: selectedSchedules.length,
+
+                          ///화면이 위젯에 보일때마다 실행되는 itemBuilder
+                          itemBuilder: (BuildContext context, int index) {
+                            ///선택된 날짜에 해당되는 일정 리스트로 저장
+                            ///List<Schedule>
+                            // final selectedSchedules = schedules[selectedDay]!;
+                            // final sheduleModel = selectedSchedules[index];
+
+                            final schedule = selectedSchedules[index];
+
+                            return ScheduleCard(
+                              startTime: schedule.startTime,
+                              endTime: schedule.endTime,
+                              content: schedule.content,
+                              color: Color(
+                                int.parse(
+                                  'FF${schedule.color}',
+                                  radix: 16,
+                                ),
+                              ),
+                            );
+                          },
+                          separatorBuilder: (BuildContext context, int index) {
+                            return SizedBox(
+                              height: 8,
+                            );
+                          },
+                        );
+                      }),
                 ),
               )
             ],

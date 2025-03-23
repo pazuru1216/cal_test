@@ -21,16 +21,12 @@ class AppDatabase extends _$AppDatabase {
 
   ///query 작성
   ///ScheduleTable을 만들면 ScheduleTableData를 drift.g.dart가 자동으로 만들어줌
-  Future<List<ScheduleTableData>> getSchedules(
-    ///필터링을 원하는 날짜를 입력받음.
-    DateTime date,
-  ) {
-    // final selectQuery = select(scheduleTable);
-    // ///파라미터에 입력한 값(date)과 일치하는 날짜들만(tbl.date) 가져올 수 있다.
-    // selectQuery.where((tbl)=>tbl.date.equals(date));
-    // ///값들 다 골랐으면 가져와~ get()
-    // return selectQuery.get();
-    return (select(scheduleTable)..where((table)=>table.date.equals(date))).get();
+  Stream<List<ScheduleTableData>> streamSchedules(
+      DateTime date,
+      ) {
+    ///1번 가져오는 Future은 get
+    ///계속해서 바라보다가 변화가 있으면 반영하는 Stream은 watch
+    return (select(scheduleTable)..where((table)=>table.date.equals(date))).watch();
   }
 
   /// 무언가를 생성하면 생성한 값에 대한 id값이 자동적으로 생성된다. 그게 int 값임.

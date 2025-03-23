@@ -66,8 +66,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(left: 15, right: 16, top: 8),
-                  child: FutureBuilder<List<ScheduleTableData>>(
-                      future: GetIt.I<AppDatabase>().getSchedules(
+                  child: StreamBuilder<List<ScheduleTableData>>(
+                      stream: GetIt.I<AppDatabase>().streamSchedules(
                         selectedDay,
                       ),
                       builder: (context, snapshot) {
@@ -79,9 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         }
 
-                        if (!snapshot.hasData &&
-                            snapshot.connectionState ==
-                                ConnectionState.waiting) {
+                        if (snapshot.data==null) {
                           return Center(
                             child: CircularProgressIndicator(),
                           );
@@ -107,12 +105,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               key:ObjectKey(schedule.id),
                               ///오른쪽에서 왼쪽으로 스와이프
                               direction: DismissDirection.endToStart,
-                              confirmDismiss: (DismissDirection direction) async{
-                                await GetIt.I<AppDatabase>().removeSchedule(schedule.id);
-                                setState(() {});
-
-                                // 삭제하겠다.
-                                return true;
+                              // confirmDismiss: (DismissDirection direction) async{
+                              //   await GetIt.I<AppDatabase>().removeSchedule(schedule.id);
+                              //
+                              //   // 삭제하겠다.
+                              //   return true;
+                              // },
+                              onDismissed: (DismissDirection direction) {
+                                GetIt.I<AppDatabase>().removeSchedule(schedule.id);
                               },
                               child: ScheduleCard(
                                 startTime: schedule.startTime,

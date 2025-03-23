@@ -22,11 +22,23 @@ class AppDatabase extends _$AppDatabase {
   ///query 작성
   ///ScheduleTable을 만들면 ScheduleTableData를 drift.g.dart가 자동으로 만들어줌
   Stream<List<ScheduleTableData>> streamSchedules(
-      DateTime date,
-      ) {
+    DateTime date,
+  ) {
     ///1번 가져오는 Future은 get
     ///계속해서 바라보다가 변화가 있으면 반영하는 Stream은 watch
-    return (select(scheduleTable)..where((table)=>table.date.equals(date))).watch();
+    return (select(scheduleTable)
+          ..where(
+            (table) => table.date.equals(date),
+          )
+          ..orderBy([
+            (table) => OrderingTerm(
+                  expression: table.startTime,
+
+                  ///오름차정렬
+                  mode: OrderingMode.asc,
+                ),
+          ]))
+        .watch();
   }
 
   /// 무언가를 생성하면 생성한 값에 대한 id값이 자동적으로 생성된다. 그게 int 값임.
@@ -37,11 +49,14 @@ class AppDatabase extends _$AppDatabase {
       into(scheduleTable).insert(data);
 
   /// 삭제한 값의 id를 받아볼 수 있기때문에 타입은 int
-  Future<int> removeSchedule(int id) => (delete(scheduleTable)..where(
-      (table)=>table.id.equals(id),
-  )).go();
+  Future<int> removeSchedule(int id) => (delete(scheduleTable)
+        ..where(
+          (table) => table.id.equals(id),
+        ))
+      .go();
 
   @override
+
   /// schema table들을 버젼으로 관리한다.
   int get schemaVersion => 1;
 }

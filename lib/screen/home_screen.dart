@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         }
 
-                        if (snapshot.data==null) {
+                        if (snapshot.data == null) {
                           return Center(
                             child: CircularProgressIndicator(),
                           );
@@ -102,26 +102,35 @@ class _HomeScreenState extends State<HomeScreen> {
                             final schedule = schedules[index];
 
                             return Dismissible(
-                              key:ObjectKey(schedule.id),
+                              key: ObjectKey(schedule.id),
+
                               ///오른쪽에서 왼쪽으로 스와이프
                               direction: DismissDirection.endToStart,
-                              // confirmDismiss: (DismissDirection direction) async{
-                              //   await GetIt.I<AppDatabase>().removeSchedule(schedule.id);
-                              //
-                              //   // 삭제하겠다.
-                              //   return true;
-                              // },
                               onDismissed: (DismissDirection direction) {
-                                GetIt.I<AppDatabase>().removeSchedule(schedule.id);
+                                GetIt.I<AppDatabase>()
+                                    .removeSchedule(schedule.id);
                               },
-                              child: ScheduleCard(
-                                startTime: schedule.startTime,
-                                endTime: schedule.endTime,
-                                content: schedule.content,
-                                color: Color(
-                                  int.parse(
-                                    'FF${schedule.color}',
-                                    radix: 16,
+                              child: GestureDetector(
+                                onTap: () async {
+                                  await showModalBottomSheet<ScheduleTable>(
+                                    context: context,
+                                    builder: (_) {
+                                      return ScheduleButtomSheet(
+                                        selectedDay: selectedDay,
+                                        id: schedule.id,
+                                      );
+                                    },
+                                  );
+                                },
+                                child: ScheduleCard(
+                                  startTime: schedule.startTime,
+                                  endTime: schedule.endTime,
+                                  content: schedule.content,
+                                  color: Color(
+                                    int.parse(
+                                      'FF${schedule.color}',
+                                      radix: 16,
+                                    ),
                                   ),
                                 ),
                               ),

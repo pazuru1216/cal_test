@@ -5,6 +5,8 @@ class CategoryTable extends Table{
 
   TextColumn get color => text()();
 
+  IntColumn get randomNumber => integer().nullable()();
+
   DateTimeColumn get createdAt => dateTime().clientDefault(
           ()=>DateTime.now().toUtc()
   )();

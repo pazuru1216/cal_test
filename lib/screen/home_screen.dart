@@ -7,6 +7,7 @@ import 'package:calendar_test/component/today_banner.dart';
 import 'package:calendar_test/const/color.dart';
 import 'package:calendar_test/database/drift.dart';
 import 'package:calendar_test/model/schedule.dart';
+import 'package:calendar_test/model/schedule_with_category.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
@@ -59,14 +60,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 /// 인수 유형 '동적 함수(DateTime)'는 매개변수 유형 'bool 함수(DateTime)'에 할당할 수 없습니다.
                 selectedDayPredicate: selectedDayPredicate,
               ),
-              TodayBanner(
-                selectedDay: selectedDay,
-                taskCount: 0,
+              StreamBuilder(
+                stream: GetIt.I<AppDatabase>().streamSchedules(
+                  selectedDay
+                ),
+                builder: (context,snapshot) {
+                  return TodayBanner(
+                    selectedDay: selectedDay,
+                    taskCount: !snapshot.hasData ? 0 :snapshot.data!.length,
+                  );
+                }
               ),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(left: 15, right: 16, top: 8),
-                  child: StreamBuilder<List<ScheduleTableData>>(
+                  child: StreamBuilder<List<ScheduleWithCategory>>(
                       stream: GetIt.I<AppDatabase>().streamSchedules(
                         selectedDay,
                       ),
@@ -99,7 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             // final selectedSchedules = schedules[selectedDay]!;
                             // final sheduleModel = selectedSchedules[index];
 
-                            final schedule = schedules[index];
+                            final scheduleWithCategory = schedules[index];
+                            final schedule = scheduleWithCategory.schedule;
+                            final category =  scheduleWithCategory.category;
 
                             return Dismissible(
                               key: ObjectKey(schedule.id),
@@ -128,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   content: schedule.content,
                                   color: Color(
                                     int.parse(
-                                      'FF${schedule.color}',
+                                      'FF${category.color}',
                                       radix: 16,
                                     ),
                                   ),

@@ -21,9 +21,30 @@ part 'drift.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
-  Future<ScheduleTableData> getScheduleById(int id) =>
-      (select(scheduleTable)..where((table) => table.id.equals(id)))
-          .getSingle();
+  Future<int> createCategory(CategoryTableCompanion data) =>
+      into(categoryTable).insert(data);
+
+  Future<List<CategoryTableData>> getCategories() =>
+      select(categoryTable).get();
+
+  Future<ScheduleWithCategory> getScheduleById(int id) {
+    final query = select(scheduleTable).join([
+      innerJoin(
+        categoryTable,
+        categoryTable.id.equalsExp(
+          scheduleTable.colorId,
+        ),
+      ),
+    ])
+      ..where(scheduleTable.id.equals(id));
+
+    return query.map((row) {
+      final schedule = row.readTable(scheduleTable);
+      final category = row.readTable(categoryTable);
+
+      return ScheduleWithCategory(category: category, schedule: schedule);
+    }).getSingle();
+  }
 
   Future<int> updateScheduleById(int id, ScheduleTableCompanion data) =>
       (update(scheduleTable)..where((table) => table.id.equals(id)))
@@ -38,22 +59,25 @@ class AppDatabase extends _$AppDatabase {
   ///ScheduleTable을 만들면 ScheduleTableData를 drift.g.dart가 자동으로 만들어줌
   ///1번 가져오는 Future은 get
   ///계속해서 바라보다가 변화가 있으면 반영하는 Stream은 watch
-  Stream<List<ScheduleTableData>> streamSchedules(
+  Stream<List<ScheduleWithCategory>> streamSchedules(
     DateTime date,
   ) {
-    return (select(scheduleTable)
-          ..where(
-            (table) => table.date.equals(date),
-          )
-          ..orderBy([
-            (table) => OrderingTerm(
-                  expression: table.startTime,
+    final query = select(scheduleTable).join([
+      innerJoin(
+        categoryTable,
+        categoryTable.id.equalsExp(
+          scheduleTable.colorId,
+        ),
+      ),
+    ])
+      ..where(scheduleTable.date.equals(date));
 
-                  ///오름차정렬
-                  mode: OrderingMode.asc,
-                ),
-          ]))
-        .watch();
+    return query.map((row) {
+      final schedule = row.readTable(scheduleTable);
+      final category = row.readTable(categoryTable);
+
+      return ScheduleWithCategory(category: category, schedule: schedule);
+    }).watch();
   }
 
   /// 무언가를 생성하면 생성한 값에 대한 id값이 자동적으로 생성된다. 그게 int 값임.
@@ -70,10 +94,23 @@ class AppDatabase extends _$AppDatabase {
         ))
       .go();
 
-  @override
-
   /// schema table들을 버젼으로 관리한다.
-  int get schemaVersion => 1;
+  @override
+  int get schemaVersion => 2;
+
+  @override
+  ///migrator : migration에 필요한 모든 기능을 제공해준다.
+  /// int from : 설치되어있는 스키마 버전
+  /// int to : 업데이트해야할 스키마 버전
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onUpgrade: (Migrator m, int from, int to) async {
+        if(from<2){
+          await m.addColumn(categoryTable, categoryTable.randomNumber);
+        }
+      },
+    );
+  }
 }
 
 LazyDatabase _openConnection() {

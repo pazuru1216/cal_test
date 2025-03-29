@@ -23,7 +23,7 @@ class _ScheduleButtomSheetState extends State<ScheduleButtomSheet> {
   int? endTime;
   String? content;
 
-  String selectedColor = categoryColors.first;
+ int? selectedColorId;
 
   ///build되었을때 한번만 실행되는 initState
   @override
@@ -36,13 +36,22 @@ class _ScheduleButtomSheetState extends State<ScheduleButtomSheet> {
     if (widget.id != null) {
       final resp = await GetIt.I<AppDatabase>().getScheduleById(widget.id!);
       setState(() {
-        selectedColor = resp.color;
+        selectedColorId = resp.category.id;
+      });
+    }else{
+      final resp = await GetIt.I<AppDatabase>().getCategories();
+      setState(() {
+        selectedColorId = resp.first.id;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if(selectedColorId == null){
+      return Container();
+    }
+
     return FutureBuilder(
         future: widget.id == null
             ? null
@@ -53,7 +62,7 @@ class _ScheduleButtomSheetState extends State<ScheduleButtomSheet> {
               !snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
-          final data = snapshot.data;
+          final data = snapshot.data?.schedule;
 
           return Container(
             color: Colors.white,
@@ -81,10 +90,10 @@ class _ScheduleButtomSheetState extends State<ScheduleButtomSheet> {
                       ),
                       SizedBox(height: 8),
                       _Category(
-                        selctedColor: selectedColor,
-                        onTap: (String color) {
+                        selctedColor: selectedColorId!,
+                        onTap: (int color) {
                           setState(() {
-                            selectedColor = color;
+                            selectedColorId = color;
                           });
                         },
                       ),
@@ -175,7 +184,7 @@ class _ScheduleButtomSheetState extends State<ScheduleButtomSheet> {
               startTime: Value(startTime!),
               endTime: Value(endTime!),
               content: Value(content!),
-              color: Value(selectedColor!),
+              colorId: Value(selectedColorId!),
               date: Value(widget.selectedDay!)),
         );
       } else {
@@ -185,7 +194,7 @@ class _ScheduleButtomSheetState extends State<ScheduleButtomSheet> {
               startTime: Value(startTime!),
               endTime: Value(endTime!),
               content: Value(content!),
-              color: Value(selectedColor!),
+              colorId: Value(selectedColorId!),
               date: Value(widget.selectedDay!)),
         );
       }
@@ -269,50 +278,58 @@ class _Contents extends StatelessWidget {
   }
 }
 
-typedef OnColorSelected = void Function(String color);
+typedef OnColorSelected = void Function(int color);
 
 class _Category extends StatelessWidget {
-  final String selctedColor;
+  final int selctedColor;
   final OnColorSelected onTap;
 
   const _Category({required this.onTap, required this.selctedColor, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: categoryColors
-          .map(
-            (e) => Padding(
-              padding: EdgeInsets.only(right: 8),
-              child: GestureDetector(
-                onTap: () {
-                  onTap(e);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Color(
-                      ///이 String을 16진수로 변환해라
-                      ///이 과정을 거치면 0xFF44336이 나온다
-                      int.parse(
-                        'FF$e',
-                        radix: 16,
+    return FutureBuilder(
+      future: GetIt.I<AppDatabase>().getCategories(),
+      builder: (context, snapshot) {
+        if(snapshot.hasData){
+          return Container();
+        }
+        return Row(
+          children: snapshot.data!
+              .map(
+                (e) => Padding(
+                  padding: EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      onTap(e.id);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color(
+                          ///이 String을 16진수로 변환해라
+                          ///이 과정을 거치면 0xFF44336이 나온다
+                          int.parse(
+                            'FF${e.color}',
+                            radix: 16,
+                          ),
+                        ),
+                        border: e.id == selctedColor
+                            ? Border.all(
+                                color: Colors.black,
+                                width: 4,
+                              )
+                            : null,
+                        shape: BoxShape.circle,
                       ),
+                      width: 32,
+                      height: 32,
                     ),
-                    border: e == selctedColor
-                        ? Border.all(
-                            color: Colors.black,
-                            width: 4,
-                          )
-                        : null,
-                    shape: BoxShape.circle,
                   ),
-                  width: 32,
-                  height: 32,
                 ),
-              ),
-            ),
-          )
-          .toList(),
+              )
+              .toList(),
+        );
+      }
     );
   }
 }

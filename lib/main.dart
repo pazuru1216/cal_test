@@ -14,6 +14,18 @@ void main() async {
   final database = AppDatabase();
   GetIt.I.registerSingleton<AppDatabase>(database);
 
+  final colors = await database.getCategories();
+
+  if(colors.isEmpty){
+    for(String hexCode in categoryColors){
+      await database.createCategory(
+        CategoryTableCompanion(
+          color: Value(hexCode),
+        )
+      );
+    }
+  }
+
   runApp(
     MaterialApp(
       home: HomeScreen(),
